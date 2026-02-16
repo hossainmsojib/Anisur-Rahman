@@ -1,0 +1,219 @@
+const $ = sel => document.querySelector(sel);
+const format = n => Number(n||0);
+const currency = n => (Math.round(n*100)/100).toLocaleString();
+
+// Table bodies
+const labourTbody = $('#labourTable tbody');
+const materialsTbody = $('#materialsTable tbody');
+const expensesTbody = $('#expensesTable tbody');
+const ordersTbody = $('#ordersTable tbody');
+
+// ===== LABOUR =====
+function addLabourRow(data={name:'',post:'',basic:0,ot:0}) {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" class="lab-name" value="${data.name}"></td>
+    <td><input type="text" class="lab-post" value="${data.post}"></td>
+    <td><input type="number" class="lab-basic" value="${data.basic}"></td>
+    <td><input type="number" class="lab-ot" value="${data.ot}"></td>
+    <td class="lab-total">0</td>
+    <td><button class="del">Delete</button></td>`;
+  labourTbody.appendChild(tr);
+  attachLabourListeners(tr);
+  recalcAll();
+  saveToLocalStorage();
+}
+function attachLabourListeners(tr){
+  const basic = tr.querySelector('.lab-basic');
+  const ot = tr.querySelector('.lab-ot');
+  const del = tr.querySelector('.del');
+  function update(){ 
+    const sum = format(basic.value)+format(ot.value);
+    tr.querySelector('.lab-total').textContent = currency(sum);
+    recalcAll();
+    saveToLocalStorage();
+  }
+  basic.addEventListener('input', update);
+  ot.addEventListener('input', update);
+  del.addEventListener('click', ()=>{ tr.remove(); recalcAll(); saveToLocalStorage(); });
+  update();
+}
+
+// ===== MATERIALS (UPDATED) =====
+function addMaterialRow(data={name:'',qty:0,unit:'Liter',price:0,total:0}){
+  const tr=document.createElement('tr');
+
+  tr.innerHTML = `
+    <td><input type="text" class="mat-name" value="${data.name}"></td>
+
+    <td><input type="number" class="mat-qty" value="${data.qty}"></td>
+
+    <td>
+      <select class="mat-unit">
+        <option value="Liter" ${data.unit==='Liter'?'selected':''}>Liter</option>
+        <option value="ML" ${data.unit==='ML'?'selected':''}>ML</option>
+        <option value="Gram" ${data.unit==='Gram'?'selected':''}>Gram</option>
+        <option value="Kg" ${data.unit==='Kg'?'selected':''}>Kg</option>
+      </select>
+    </td>
+
+    <td><input type="number" class="mat-price" value="${data.price}"></td>
+
+    <td class="mat-total">${currency(data.total || 0)}</td>
+
+    <td><button class="del">Delete</button></td>
+  `;
+
+  materialsTbody.appendChild(tr);
+  attachMaterialListeners(tr);
+  recalcAll();
+  saveToLocalStorage();
+}
+
+function attachMaterialListeners(tr){
+  const qty = tr.querySelector('.mat-qty');
+  const price = tr.querySelector('.mat-price');
+  const del = tr.querySelector('.del');
+
+  function updateMaterialTotal(){
+    const total = (Number(qty.value)||0) * (Number(price.value)||0);
+    tr.querySelector('.mat-total').textContent = currency(total);
+    recalcAll();
+    saveToLocalStorage();
+  }
+
+  qty.addEventListener('input', updateMaterialTotal);
+  price.addEventListener('input', updateMaterialTotal);
+
+  del.addEventListener('click', ()=>{
+    tr.remove();
+    recalcAll();
+    saveToLocalStorage();
+  });
+
+  updateMaterialTotal();
+}
+
+// ===== EXPENSES =====
+function addExpenseRow(data={no:null,desc:'',amt:0}){
+  const tr=document.createElement('tr');
+  tr.innerHTML = `
+    <td class="exp-no">${data.no!==null?data.no:''}</td>
+    <td><input type="text" class="exp-desc" value="${data.desc}"></td>
+    <td><input type="number" class="exp-amt" value="${data.amt}"></td>
+    <td><button class="del">Delete</button></td>`;
+  expensesTbody.appendChild(tr);
+  tr.querySelector('.exp-amt').addEventListener('input', ()=>{ recalcAll(); saveToLocalStorage(); });
+  tr.querySelector('.del').addEventListener('click', ()=>{ tr.remove(); renumberExpenses(); recalcAll(); saveToLocalStorage(); });
+  saveToLocalStorage();
+}
+function renumberExpenses(){
+  [...expensesTbody.querySelectorAll('tr')].forEach((r,i)=>r.querySelector('.exp-no').textContent = i+1);
+}
+
+// ===== ORDERS =====
+function addOrderRow(data={order:'',customer:'',product:'',qty:0,price:0}){
+  const tr=document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" class="ord-no" value="${data.order}"></td>
+    <td><input type="text" class="ord-cust" value="${data.customer}"></td>
+    <td><input type="text" class="ord-prod" value="${data.product}"></td>
+    <td><input type="number" class="ord-qty" value="${data.qty}"></td>
+    <td><input type="number" class="ord-price" value="${data.price}"></td>
+    <td class="ord-total">0</td>
+    <td><button class="del">Delete</button></td>`;
+  ordersTbody.appendChild(tr);
+  attachOrderListeners(tr);
+  recalcAll();
+  saveToLocalStorage();
+}
+function attachOrderListeners(tr){
+  const qty=tr.querySelector('.ord-qty');
+  const price=tr.querySelector('.ord-price');
+  const del=tr.querySelector('.del');
+  function update(){
+    const sum=format(qty.value)*format(price.value);
+    tr.querySelector('.ord-total').textContent=currency(sum);
+    recalcAll();
+    saveToLocalStorage();
+  }
+  qty.addEventListener('input', update);
+  price.addEventListener('input', update);
+  del.addEventListener('click', ()=>{ tr.remove(); recalcAll(); saveToLocalStorage(); });
+  update();
+}
+
+// ===== RECALCULATE =====
+function recalcAll(){
+  let labourSum=[...labourTbody.querySelectorAll('tr')].reduce((s,r)=>s+(parseFloat(r.querySelector('.lab-total').textContent.replace(/,/g,''))||0),0);
+  $('#labourTotal').textContent=currency(labourSum);
+  $('#sumLabour').textContent=currency(labourSum);
+
+  let matsSum=[...materialsTbody.querySelectorAll('tr')]
+  .reduce((s,r)=>s+(parseFloat(r.querySelector('.mat-total').textContent.replace(/,/g,''))||0),0);
+
+  $('#materialsTotal').textContent=currency(matsSum);
+  $('#sumMaterials').textContent=currency(matsSum);
+
+  let expSum=[...expensesTbody.querySelectorAll('tr')].reduce((s,r)=>s+format(r.querySelector('.exp-amt').value),0);
+  $('#expensesTotal').textContent=currency(expSum);
+  $('#sumExpenses').textContent=currency(expSum);
+
+  let ordSum=[...ordersTbody.querySelectorAll('tr')].reduce((s,r)=>s+(parseFloat(r.querySelector('.ord-total').textContent.replace(/,/g,''))||0),0);
+  $('#ordersTotal').textContent=currency(ordSum);
+  $('#sumOrders').textContent=currency(ordSum);
+
+  const net=ordSum-(labourSum+matsSum+expSum);
+  const netEl=$('#netProfit');
+  netEl.textContent=currency(net);
+  netEl.className=net>=0?'positive':'negative';
+}
+
+// ===== LOCALSTORAGE =====
+function saveToLocalStorage() {
+    const data = {
+        labour: labourTbody.innerHTML,
+        materials: materialsTbody.innerHTML,
+        expenses: expensesTbody.innerHTML,
+        orders: ordersTbody.innerHTML
+    };
+    localStorage.setItem('iyubData', JSON.stringify(data));
+}
+
+function loadFromLocalStorage() {
+    const saved = localStorage.getItem('iyubData');
+    if(saved){
+        const data = JSON.parse(saved);
+        labourTbody.innerHTML = data.labour;
+        materialsTbody.innerHTML = data.materials;
+        expensesTbody.innerHTML = data.expenses;
+        ordersTbody.innerHTML = data.orders;
+
+        [...labourTbody.querySelectorAll('tr')].forEach(tr => attachLabourListeners(tr));
+        [...materialsTbody.querySelectorAll('tr')].forEach(tr => attachMaterialListeners(tr));
+        [...expensesTbody.querySelectorAll('tr')].forEach(tr => {
+            tr.querySelector('.exp-amt')?.addEventListener('input', ()=>{ recalcAll(); saveToLocalStorage(); });
+            tr.querySelector('.del')?.addEventListener('click', ()=>{ tr.remove(); renumberExpenses(); recalcAll(); saveToLocalStorage(); });
+        });
+        [...ordersTbody.querySelectorAll('tr')].forEach(tr => attachOrderListeners(tr));
+        recalcAll();
+    }
+}
+window.addEventListener('load', loadFromLocalStorage);
+
+// ===== EVENTS =====
+$('#addLabour').addEventListener('click', ()=>addLabourRow());
+$('#addMaterial').addEventListener('click', ()=>addMaterialRow());
+$('#addExpense').addEventListener('click', ()=>addExpenseRow({no:expensesTbody.children.length+1}));
+$('#addOrder').addEventListener('click', ()=>addOrderRow());
+
+$('#clearBtn').addEventListener('click', ()=>{
+  if(confirm("Clear all data?")){
+    labourTbody.innerHTML='';
+    materialsTbody.innerHTML='';
+    expensesTbody.innerHTML='';
+    ordersTbody.innerHTML='';
+    recalcAll();
+    localStorage.removeItem('iyubData');
+  }
+});

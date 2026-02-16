@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Anisur GROUP - Accounting Sheet</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Bipu And Anika Rent A Car</h1>
+        <div class="muted">Address: BSIC TONGI BAZAR, GAZIPUR CITY</div>
+      </div>
+
+      <div class="actions-right">
+        <button id="exportBtn" class="small-btn">Export CSV</button>
+        <button id="clearBtn" class="small-btn ghost">Clear All</button>
+        <button id="themeToggle" class="small-btn ghost">🌙 Dark</button>
+      </div>
+    </header>
+
+    <!-- Labour -->
+    <section class="card">
+      <div class="flex-between">
+        <h3>Labour Payment</h3>
+        <button id="addLabour">Add Labour</button>
+      </div>
+      <table id="labourTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Post</th>
+            <th>Basic Salary</th>
+            <th>Over Time</th>
+            <th>Total Income</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+          <tr>
+            <th colspan="4">Total Labour Cost</th>
+            <th id="labourTotal">0</th>
+            <th></th>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+
+    <!-- Materials -->
+    <section class="card">
+      <div class="flex-between">
+        <h3>Raw Materials</h3>
+        <button id="addMaterial">Add Material</button>
+      </div>
+      <table id="materialsTable">
+        <thead>
+          <tr>
+            <th>Material</th>
+            <th>Qty</th>
+            <th>Unit</th>
+            <th>Price</th>
+            <th>Total</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+          <tr>
+            <th colspan="4">Total Materials</th>
+            <th id="materialsTotal">0</th>
+            <th></th>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+
+    <!-- Expenses -->
+    <section class="card">
+      <div class="flex-between">
+        <h3>Extra Expenses</h3>
+        <button id="addExpense">Add Expense</button>
+      </div>
+      <table id="expensesTable">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+          <tr>
+            <th colspan="2">Total</th>
+            <th id="expensesTotal">0</th>
+            <th></th>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+
+    <!-- Orders -->
+    <section class="card">
+      <div class="flex-between">
+        <h3>Orders</h3>
+        <button id="addOrder">Add Order</button>
+      </div>
+      <table id="ordersTable">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Customer</th>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Total</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+          <tr>
+            <th colspan="5">Total Orders</th>
+            <th id="ordersTotal">0</th>
+            <th></th>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+
+    <!-- Summary -->
+    <section class="card">
+      <h3>Summary</h3>
+      <div class="summary">
+        <div class="item">Labour <div id="sumLabour">0</div></div>
+        <div class="item">Materials <div id="sumMaterials">0</div></div>
+        <div class="item">Expenses <div id="sumExpenses">0</div></div>
+        <div class="item">Orders <div id="sumOrders">0</div></div>
+        <div class="item">Profit <div id="netProfit">0</div></div>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
